@@ -23,6 +23,24 @@
         letter-spacing: -0.06em;
       }
 
+	  h2 {
+		font-size: 2em;
+		margin: 10px;
+		color: #d00;
+	  }
+
+	  h3 {
+		margin: 10px;
+	  }
+	  
+	  .choose-coefficient{
+		padding-bottom: 15px;
+	  }
+	  
+	  label {
+		padding-left: 15px;
+	  }
+	  
       .inp {
         position: absolute;
         z-index: 2;
@@ -33,22 +51,26 @@
         position: absolute;
         margin-left: 35%;
         z-index: 5;
-      /*  display: none;*/
       }
 
       video{
         /*display: none;*/
         position: absolute;
       }
+	  
+	  
     </style>
   </head>
   <body>
     <h1>HTML5 video with canvas</h1>
+	<h2>Select a fragment on the video image with the mouse and choose the scale</h2>
     <div class="container">
       <div class="choose-coefficient">
-        <label>x1<input type="radio" checked name="сoef" id="с1"></label>
-        <label>x0.5<input type="radio" name="сoef" id="с2"></label>
-        <label>x2<input type="radio" name="сoef" id="с4"></label>
+	  <h3>Scale:</h3>
+        <label><input type="radio" checked name="сoef" id="с1">x1</label>
+        <label><input type="radio" name="сoef" id="с2">x0.5</label>
+        <label><input type="radio" name="сoef" id="с4">x2</label>
+		<label><input type="radio" name="сoef" id="с4">x3</label>
       </div>
       <div>
         <video src="assets/media/cat.mp4"  autoplay loop controls muted>
