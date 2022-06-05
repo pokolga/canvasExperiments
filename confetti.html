@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+	<canvas id="canvas"></canvas>
+
+    <script>
+	 
+	 
+		const  myWidth = document.body.clientWidth;
+		console.log();	
+		const paper = document.getElementById("canvas");
+		const ctx = paper.getContext('2d');
+
+		paper.width = myWidth;
+		paper.height = 75;
+		
+		//тени
+		ctx.shadowBlur = 5;
+		ctx.shadowColor = "grey";
+		ctx.shadowOffsetX = 2;
+		ctx.shadowOffsetY = 2;
+		
+		let startTime = undefined;
+				
+		function render(time = Date.now()) {
+ 
+			if (startTime === undefined)
+				startTime = time;
+
+			if ((time - startTime) > 100){   //изменяя число можем менять скорость анимации
+				//случайным образом задаем расположение конфетти
+				const x = Math.round(Math.random()*myWidth);
+				const y = Math.round(Math.random()*paper.height);
+				const z =  20;//Math.round(Math.random()*10)+5
+
+				// рисуем конфетти
+				 ctx.beginPath();
+				 ctx.arc(x,y,z,0,2 * Math.PI,false);
+				 ctx.fillStyle = `rgba(${randomColor()},${randomColor()},${randomColor()},1)`; 
+				 ctx.fill();
+
+				 ctx.closePath();
+				 
+				 startTime = undefined;
+			 }
+		}
+
+
+		(function animloop(){
+		  render();
+		  requestAnimationFrame(animloop);
+		})();
+    
+		function randomColor(){
+			return Math.floor(Math.random()*256);
+		}  
+
+	</script>	
+  </body>
+</html>

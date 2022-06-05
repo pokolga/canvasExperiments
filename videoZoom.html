@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+  <head>
+    <title>HTML5 video with canvas</title>
+    <style>
+      body {
+        background: #eee;
+        font-family: "Helvetica Neue", sans-serif;
+        font-size: 0.9em;
+        line-height: 1.2;
+        color: #222;
+      }
+
+      a { 
+        color: #227; 
+      }
+
+      h1 {
+        font-size: 4em;
+        margin: 10px;
+        color: #d00;
+        text-shadow: 2px 5px 10px #bbb;
+        letter-spacing: -0.06em;
+      }
+
+      .inp {
+        position: absolute;
+        z-index: 2;
+        border: 1px grey solid;
+      }
+
+      .out {
+        position: absolute;
+        margin-left: 35%;
+        z-index: 5;
+      /*  display: none;*/
+      }
+
+      video{
+        /*display: none;*/
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>HTML5 video with canvas</h1>
+    <div class="container">
+      <div class="choose-coefficient">
+        <label>x1<input type="radio" checked name="сoef" id="с1"></label>
+        <label>x0.5<input type="radio" name="сoef" id="с2"></label>
+        <label>x2<input type="radio" name="сoef" id="с4"></label>
+      </div>
+      <div>
+        <video src="assets/media/cat.mp4"  autoplay loop controls muted>
+        </video>
+        <canvas class="inp"></canvas>
+        <canvas class="inp"></canvas>
+        
+      </div>
+      <div>
+        <canvas  class="out"></canvas>
+      </div>
+    </div>	
+    <script>
+    //канвас: доступ, прописать контекст
+        let newZoom, readyToDraw = false;
+        let x0,y0;
+        let coefficient = 1;
+        const canv = document.querySelectorAll(".inp");
+        const canvOutput = document.querySelector(".out");
+        const ctx = canv[0].getContext("2d");
+        const borderOfBox = canv[1].getContext("2d"); //рамка
+
+        //коэффициент увеличения
+        document.querySelectorAll(".choose-coefficient > label").forEach((elem) => {
+          elem.onclick = function (){
+           
+            coefficient = +this.textContent.match(/\d(\.\d)?/)[0];
+              console.log(coefficient);
+              canvOutput.width = video.videoWidth * coefficient;
+              canvOutput.height = video.videoHeight * coefficient;
+          }
+        });
+
+        const video = document.querySelector("video");
+        //пытаемся запустить видео, как только это будет возможным, таймер jumpTimer будет отключен
+        start = 0;
+        const jumpTimer = setInterval( function(){
+          try{
+            video.currentTime = start;	
+            clearInterval(jumpTimer);
+            video.play();
+          }			
+          catch(e){
+            console.log(e);
+          }	
+        }, 100)
+        
+        
+        //слушатель события готовности видео к воспроизведению с переносом видео на канвас
+        video.addEventListener('canplay',function(){
+          //перенос видео на канвас
+          //задаем размеры канвы по размеру исходного видео
+              canv.forEach(function(item,i){
+                canv[i].width = video.videoWidth;
+                canv[i].height = video.videoHeight;
+              })	
+              canvOutput.width = video.videoWidth * coefficient;
+              canvOutput.height = video.videoHeight * coefficient;
+
+          setInterval( function(){
+              ctx.drawImage(
+                video,	
+                0,
+                0,
+                video.videoWidth,
+                video.videoHeight,
+                0,
+                0,
+                this.width,
+                this.height
+              )
+          },67)
+        },false)
+
+    canv[1].onmousedown = function(e){
+      readyToDraw = true;
+      x0 = e.offsetX;
+      y0 = e.offsetY;
+      canvOutput.width = video.videoWidth * 4; //очищаем канвас, куда будем показывать
+      canvOutput.height = video.videoHeight * 4;
+      clearInterval(newZoom);
+    }
+
+    canv[1].onmousemove = function(e){
+      /*рисуем рамку*/
+      if (readyToDraw)
+      {
+        borderOfBox.clearRect(0,0,this.width,this.height);
+        const tmp_x = e.offsetX;
+        const tmp_y = e.offsetY;
+        borderOfBox.beginPath();
+        borderOfBox.moveTo(Math.min(x0,tmp_x),Math.min(y0,tmp_y));
+        borderOfBox.rect(Math.min(x0,tmp_x),Math.min(y0,tmp_y),Math.abs(tmp_x-x0),Math.abs(tmp_y-y0));
+        borderOfBox.strokeStyle = "red";
+        borderOfBox.stroke();
+        borderOfBox.closePath();
+      }	
+    } 
+    canv[1].onmouseup = stopAndShow;
+    canv[1].onmouseover = stopAndShow;
+
+    function stopAndShow(e){
+      if (!readyToDraw) return;
+      readyToDraw = false;
+     
+      clearInterval(newZoom);
+      const x1 = e.offsetX;
+      const y1 = e.offsetY;
+      const outputZoom = canvOutput.getContext("2d");
+      canvOutput.style.display = "block";
+      
+      newZoom = setInterval( function(){
+              outputZoom.drawImage(
+                video,	
+                Math.min(x0,x1),
+                Math.min(y0,y1),
+                Math.abs(x1 - x0),
+                Math.abs(y1 - y0),
+                Math.min(x0,x1) * coefficient,
+                Math.min(y0,y1) * coefficient,
+                Math.abs(x1 - x0) * coefficient,
+                Math.abs(y1 - y0) * coefficient
+              )
+          },67)
+    }	
+
+    </script>	
+  </body>
+</html>

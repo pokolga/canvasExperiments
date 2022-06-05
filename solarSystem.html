@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<style>
+		body {
+			background: #001334;
+		}
+		canvas {
+			position:absolute;
+		}
+		
+		.sunSystem {
+			width:100%; 
+			height: 100%;
+		}
+		
+	</style>
+  
+  </head>
+  <body>
+  
+	<div class="sunSystem">
+	</div>
+
+	 <script>
+	//Меркурий  от Солнца 58 млн км. Планета обращается вокруг Солнца за 88 земных суток. Радиус Меркурия 2440 км
+	//Венера расстояние от Солнца 108 млн км. Период обращения вокруг Солнца равен 225 земных суток. Радиус равен 6052 км. 
+	//Земля расстояние от Солнца 150 млн км. Период обращения вокруг Солнца равен 365 земных суток. Радиус Земли 6371 км
+	//Марс расстояние от Солнца 228 млн км. Период обращения вокруг Солнца равен 687 земных суток. Радиус Земли 3375 км
+	//Солнце. Радиус 0.6 млн км. 
+	//макс.орбита - 228 * 2 млн.км., 1 млн.км. = мин.размер канвас / (228 * 2)
+		
+		window.onload = init;
+		window.onresize = init;
+		
+		function init(){
+			const myWidth = document.documentElement.clientWidth ;
+			const myHeight = document.documentElement.clientHeight;
+		
+			const distance = [58,108,150,228,0];
+			const color = ["#767676","#fae5ba","#00BCD4","#FF5722","yellow"];
+			const periods = [88,-225,360,687,1];
+			const allCanvas = document.querySelectorAll("canvas");
+			allCanvas.forEach( (canvas) => canvas.remove());
+			distance.forEach( (dist,i) => Planet(dist,color[i],periods[i],myWidth,myHeight));
+		}	
+		
+		function rotateCtx(what,angle)
+		{	
+			what.curAngle = parseFloat(what.curAngle) + 360/angle;
+			what.style.transform = `rotate(${what.curAngle}deg)`;
+		}
+		
+		function transCtx(what)
+		{	//солнце, мерцание
+			what.curAngle = Math.sin(new Date());
+			what.style.transform = `scale(${what.curAngle})`;
+		}
+		
+		
+		function Planet(radFrSun,color,period,myWidth,myHeight)
+		{	
+			let size = (myWidth < myHeight) ? myWidth : myHeight;
+			
+			const mlnKm = size/(2 * 230); //размер 1 млн.км, приведенный к размерам канвас
+			
+			const tmpC = document.createElement("canvas");
+			
+			tmpC.width = size;
+			tmpC.height = size;
+			const ctx = tmpC.getContext('2d');
+			
+			ctx.lineWidth = 1;
+			ctx.translate(size/2, size/2);
+			
+			ctx.beginPath();
+			ctx.moveTo(radFrSun * mlnKm,0);
+			ctx.arc(0, 0, radFrSun * mlnKm, 0, 2*Math.PI, false);//орбита
+			ctx.strokeStyle = "#767676";
+			ctx.stroke();
+			ctx.closePath();
+			
+			ctx.beginPath();	 	
+			ctx.arc(radFrSun * mlnKm, 0, 3, 0, 2*Math.PI, false); //планета
+			ctx.fillStyle = color;
+			ctx.fill();
+			ctx.closePath();
+			
+			tmpC.curAngle = 0;
+			if (radFrSun == 0)
+			{	ctx.beginPath();
+				ctx.arc(radFrSun*mlnKm,0,5,0,2*Math.PI,false); //солнце
+				ctx.fillStyle = color;
+				ctx.fill();
+				ctx.closePath();
+				setInterval(transCtx,500,tmpC);
+				
+			}
+			else
+			{
+				setInterval(rotateCtx,80,tmpC,period,color);
+			}
+			 
+			document.querySelector(".sunSystem").append(tmpC);
+		}
+   	</script>	
+  </body>
+</html>

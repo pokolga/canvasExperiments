@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <style>
+	body {
+		background-image: url('assets/img/bedroom.jpg');
+		background-repeat: no-repeat;
+		background-size: cover;
+		overflow: hidden;
+	}
+	
+	.cat {
+		position: absolute;
+	}
+	
+	canvas {
+		left: 0;
+		top: 0;
+		position: absolute;
+		z-index: 10;
+	}
+	
+	h1 {
+		color: white;
+		position: absolute;
+		z-index: 12;
+		padding: 20px 0 0 20px;
+	}
+  </style>
+</head>
+<body>
+	<h1>Найди черную кошку в темной комнате и прогони (кликни по ней)</h1>
+	<canvas id="canvas"></canvas>
+
+	<img class="cat" src="assets/img/cat1.png" alt="cat">
+
+	 <script>
+		window.onload = function(){
+		
+			let grad;  
+		
+			const cat = document.querySelector('.cat');
+			const paper = document.getElementById("canvas");
+			const ctx = paper.getContext('2d');
+			
+			paper.height = document.documentElement.clientHeight; //window.innerHeight;  
+			paper.width = document.documentElement.clientWidth;
+			
+			cat.width = 100;
+			cat.style.left = Math.random() * (paper.width - cat.width) + "px";
+			cat.style.top = Math.random() * (paper.height)/2 + paper.height  / 2 - cat.offsetHeight+ "px";
+		
+			if (parseInt(cat.style.top) > (paper.height - cat.offsetHeight * 2)) cat.width = 200;
+			console.log(cat.width);
+			
+						
+			ctx.fillRect(0,0,paper.width,paper.height);
+			
+			paper.onmousemove = function(ev){
+				
+				ctx.clearRect(0,0,paper.width,paper.height);
+				grad = ctx.createRadialGradient(ev.offsetX, ev.offsetY, 25, ev.offsetX, ev.offsetY, 120); 
+				grad.addColorStop(0, 'transparent');
+				grad.addColorStop(0.2, 'transparent');
+				grad.addColorStop(0.6, 'rgba(254,254,135,0.2)');
+				grad.addColorStop(0.8, 'rgba(254,254,135,0.5)');
+				grad.addColorStop(1, 'rgba(0,0,0,0.9)');
+				ctx.fillStyle = grad;
+
+				ctx.fillRect(0,0,paper.width,paper.height);
+			
+			}
+			
+			paper.onclick = (ev) => {
+				if (ev.offsetX > parseInt(cat.style.left) && ev.offsetX < (parseInt(cat.style.left)+cat.width) && ev.offsetY > parseInt(cat.style.top) && ev.offsetY < (parseInt(cat.style.top)+cat.height)){
+				//	alert("!!! CAT !!! ^-^");
+				cat.width = 100;
+				cat.style.left = Math.random() * (paper.width - cat.width) + "px";
+				cat.style.top = Math.random() * (paper.height)/2 + paper.height/2 + "px";
+				cat.src = `assets/img/cat${Math.ceil(Math.random() * 3)}.png`;
+				if (parseInt(cat.style.top) > (paper.height - cat.offsetHeight * 2)) cat.width = 200;
+				document.querySelector("h1").textContent = "Продолжай искать...";
+				}
+			}
+		}
+		//1. для чего применяется строка 47 : if (parseInt(cat.style.top) > (paper.height - cat.offsetHeight)) cat.width = 200;
+		//2. измените код таким образом, чтобы при клике на котика он перемещался в другое случайное место.
+		//3. как сделать луч фонарика желтоватым?
+		</script>
+		</body>
+</html>

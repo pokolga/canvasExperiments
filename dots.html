@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	  <style>
+		body{
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	  </style>
+	</head>
+	<body>
+		
+		<canvas></canvas>
+
+		<script>
+			class Star {
+				constructor() {
+					this.color = `hsl(${Math.floor(Math.random() * 360)},70%,50%)`;
+					this.x  = +`${Math.floor(Math.random() * innerWidth)}`;
+					this.y  = +`${Math.floor(Math.random() * innerHeight)}`;
+					this.size = 1;
+					this.middleSize = 5; 
+					this.bigSize = 10;
+					this.lineWidth = 1;
+				}
+
+				show(ctx,x,y){
+					ctx.beginPath();
+					
+					if (this.distance(x, y, 350)){
+						this.size = this.middleSize;
+						if (this.distance(x, y, 150)){
+							this.size = this.bigSize;
+						}
+						this.line(ctx, x, y);
+					}
+					else {
+						this.size = 1;
+					}
+					ctx.fillStyle = this.color;
+					ctx.arc(this.x,this.y,this.size,0,2 * Math.PI,false);
+					ctx.fill();
+					ctx.closePath();
+				}
+				
+				line(ctx,x,y){
+					ctx.beginPath();
+					ctx.lineWidth = this.lineWidth;
+					ctx.strokeStyle = this.color;
+					ctx.moveTo(this.x,this.y);
+					ctx.lineTo(x,y);
+					ctx.stroke();
+					ctx.closePath();
+				}
+				
+				distance(x,y,dist){
+					const deltaX = this.x - x; 
+					const deltaY = this.y - y; 
+					
+					if (Math.sqrt( Math.pow(deltaX,2) + Math.pow(deltaY,2)) < dist){
+						return true;
+					}
+					return false;
+				}
+			}
+			
+			const arr = (new Array(75)).fill(""); //create random dots
+
+			const paper = document.querySelector("canvas");
+			const ctx = paper.getContext('2d');
+      paper.width = innerWidth;
+      paper.height = innerHeight;
+      ctx.fillStyle = "#082567";
+      ctx.fillRect(0,0,paper.width,paper.height);
+      
+      arr.forEach((elem, i) => {
+        arr[i] = new Star();
+        arr[i].show(ctx);
+      })
+      newFrame(0,0);
+				
+				
+			function newFrame(x, y ,kx = 20,ky = 12){
+       
+				if (x > innerWidth) {
+          kx = -kx;
+          x = innerWidth;
+        }
+        if (x < 0) {
+          kx = -kx;
+          x = 0;
+        }
+				if (y > innerHeight) {
+          ky = -ky;
+          y = innerHeight;
+        }  
+        if (y < 0) {
+          ky = -ky;
+          y = 0;
+        }   
+				ctx.fillStyle = "#082567";
+				ctx.fillRect(0,0,paper.width,paper.height);
+			
+				arr.forEach((elem) => {
+					elem.show(ctx, x, y);
+				});
+
+				setTimeout(newFrame,50,x+Math.random() * kx,y+Math.random() * ky,kx,ky);
+			}
+		</script>
+	</body>
+</html>

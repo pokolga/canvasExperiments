@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      img {
+        position: absolute;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      
+      canvas {
+        position: absolute;
+      }
+    </style>
+  </head >
+  <body>
+    <img class="polar-bear" src="assets/img/bm.jpg">
+    <canvas></canvas >
+	  
+  	<script>
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext('2d');
+      
+      const img = document.querySelector(".polar-bear");
+      img.style.opacity = 0;
+      //обработчик по загрузке картинки узора на окне.
+      img.onload = function(){
+        canvas.height = this.height;
+        canvas.width = this.width;
+        const pat = new Image();
+        
+        pat.onload = function(){
+          ctx.fillStyle = ctx.createPattern(this,"repeat");
+          
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          img.style.opacity = 1;
+        }
+        pat.src="assets/img/moroz.jpg";
+      }
+      
+      canvas.onmousedown = beginDraw;
+      canvas.onmouseup = endDraw;
+      canvas.onmouseout = endDraw;
+      canvas.onmousemove = draw;
+         
+      drawStarted = false;
+      
+      function beginDraw(ev) {
+          ctx.beginPath();
+          ev._x = ev.layerX;
+          ev._y = ev.layerY;
+          ctx.moveTo(ev._x, ev._y);
+          drawStarted = true;
+      };
+
+      // Эта функция вызывается каждый раз, когда вы перемещаете мышь.
+      // Но рисование происходит только когда вы удерживаете кнопку мыши
+      // нажатой.
+      function draw(ev) {
+          if (drawStarted) {
+            ev._x = ev.layerX;
+            ev._y = ev.layerY;
+            ctx.lineWidth = 70;
+            //делаем пиксели прозрачными
+            ctx.strokeStyle = "rgba(0,0,0,1)";
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.lineTo(ev._x, ev._y);
+            ctx.stroke();
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+        
+            for (let i = 0; i < pixels.length; i += 4) {
+              if(pixels[i] === 0 && pixels[i + 1] ===0 && pixels[i + 2]===0) {
+                pixels[i + 3] = 0;
+              }
+            }
+            ctx.putImageData(imageData, 0, 0);
+          }
+      };
+
+      // Событие при отпускании мыши
+      function endDraw(ev) {
+          if (drawStarted) {
+              draw(ev);
+              drawStarted = false;
+          }
+      };
+  	</script>  
+  </body >
+</html>

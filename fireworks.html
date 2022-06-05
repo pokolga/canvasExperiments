@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fireworks</title>
+	<style>
+	  body{
+		  background:#500;
+		  margin:0;
+		  width:100%;
+		  overflow:hidden;
+		}
+	</style>
+</head>
+<body>
+    
+    <canvas></canvas>
+
+    <script>
+    
+        
+        const canvas = document.querySelector("canvas");     
+        const ctx = canvas.getContext('2d');
+	
+		
+		ctx.globalCompositeOperation = 'source-over';
+		
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+		
+		ctx.fillStyle = "white";
+		ctx.font = "130pt Arial";
+		ctx.fillText("Click me!", canvas.width/2 - 100, canvas.height/2);
+		
+		let fullNumb = 0;
+		const arrFl = [];
+		const colo = ["yellow","orange","pink","green","red","#65d"];
+		let minLength = Math.min(canvas.width,canvas.height)/4;
+		
+        window.addEventListener('resize', function() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+		  minLength = Math.min(canvas.width,canvas.height)/4;
+		  ctx.fillText("Click me!", 20, 50);
+        }, false);
+
+ 
+		function Firework(centerX = Math.floor(Math.random()*canvas.width), centerY = Math.floor(Math.random()*canvas.height))
+		{
+			this.size = Math.floor(Math.random()*200 + 70);
+			this.centerX = centerX;
+			this.centerY = centerY;
+			this.color = colo[Math.floor(Math.random()*colo.length)];
+			this.t = 0;
+			this.max = Math.floor(Math.random() * 1000 + 100);
+			this.dot = Math.random() * 2 + 1;
+		}				
+		
+
+		Firework.prototype.draw = function(){
+		
+			ctx.fillStyle = 'hsla(0,0%,0%,.1)';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			let foo, i, j, r;
+			foo = Math.sin(this.t) * 6;
+			
+			
+			for (let i = 0; i < this.size; ++i) {
+				r = this.size * Math.sin(i * foo);
+				
+				ctx.fillStyle = this.color;		
+				
+				ctx.beginPath();
+				ctx.arc(Math.sin(i) * r + (this.centerX), 
+						Math.cos(i) * r + (this.centerY), 
+						this.dot, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.closePath();
+			}
+			const speed = Math.random() * 10 + 5 ; //скорость раскрытия
+			this.t += speed / 1000000;
+		} 
+
+	document.onclick = function(evt){
+			const obj = new Firework(evt.pageX, evt.pageY);
+			run(obj);
+	}
+
+	
+ 
+	function run(obj){
+		const event = new Event("click"); //объект события клика
+		if (obj.max-- < 0) //время существования истекло
+		{
+			if (Math.random() > 0.4) //не всякий фейерверк рождает новый
+			{
+				document.dispatchEvent(event); //имитация клика
+			}
+			cancelAnimationFrame(obj.id );
+			return;
+		}
+		
+		obj.id = requestAnimationFrame(() => run(obj)); //рекурсивно вызываем след.состояние фейерверка
+		obj.draw();
+	}
+
+    </script>
+</body>
+</html>
