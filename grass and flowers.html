@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas {
+            background-color:hsl(180, 100%, 90%);/**/
+            
+            position: relative;
+        }
+
+
+    </style>
+</head>
+<body>
+   
+    <canvas  height=500></canvas>
+   <h3>Кликни сверху - вырастет трава. А потом посади кликом цветочки</h3>
+    <script>
+        function rand(a,b){
+            return Math.floor(Math.random() * (b - a + 1)) + a;
+        }
+        
+        class Line {
+            constructor(fieldWidth, fieldHeight,i) {
+               this.x = rand(0,fieldWidth);
+               this.deltaX = rand(-10,10)/10;
+               this.y = rand(fieldHeight/10*9,fieldHeight+10);
+               this.strokeStyle =`hsl(${80+rand(0,60)},100%,${20+rand(0,20)}%)`;
+               this.lineWidth = rand(40,50)/10;
+               this.delay = rand(0,70);
+               this.i = i;
+            }
+
+            graw(context) {
+                if (this.lineWidth < 0.5) {
+                    //удалить
+                    array.splice(this.i,1,0);
+                    return;
+                }
+                context.beginPath();
+                context.moveTo(this.x, this.y);
+                this.x += this.deltaX; 
+                this.lineWidth = this.lineWidth - 0.1;
+                context.lineWidth = this.lineWidth;
+                
+                this.y -= 4;
+               
+                context.lineTo(this.x,this.y);
+                context.strokeStyle = this.strokeStyle;
+                context.stroke();
+                context.closePath();
+            }
+    }
+
+    function openFlower(x,y){	
+            canvas.onclick = null;
+			const size =  Math.floor(Math.random()*15)+10;
+			
+			const ctx = document.querySelector("canvas").getContext('2d');
+			
+			ctx.translate(x,y);
+			
+			const colo = ["rgba(255, 92, 203,0.2)","rgba(105, 255, 183,0.2)","rgba(55, 192, 203,0.2)","rgba(255, 250, 203,0.2)"];
+			const color = colo[Math.floor(Math.random()*4)];
+
+            flOpen(1,ctx,color,size);
+	}
+		
+	
+	
+	
+	function flOpen(step,ctx,color,size){
+
+		if (step>40) {
+			for (let i = 0; i<15; i++){
+				
+				drawTichinki(ctx,size,color);
+			}
+
+        //пестик
+            ctx.translate(-1*step,-1*step);
+			ctx.moveTo(step,step);
+			
+			ctx.beginPath();
+		 	
+			
+			ctx.fillStyle = `rgba(255, 241, 117,0.8)`;
+			ctx.arc(step,step,step/6,0,Math.PI*2,false);
+			
+			ctx.shadowColor = color;
+			
+			ctx.shadowBlur = 30;
+		 	
+			ctx.fill();
+			ctx.closePath();
+
+            //восстановление до исходного состояния
+            step=1;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            canvas.onclick = (e) =>  openFlower(e.clientX,e.clientY);
+			return;
+		}	
+		
+		ctx.save();
+
+		for (let i=0; i<7; i++) {	
+				ctx.beginPath();
+
+				ctx.moveTo(0,0);
+				ctx.arc(0,0,size/10*step,0,Math.PI/(Math.random()*1.5+4),false);
+				
+				ctx.fillStyle = color ;
+			 	ctx.fill();
+
+				ctx.closePath();
+				
+				ctx.rotate(Math.PI / 180 * (51));
+		 }
+		 
+		/* 	ctx.translate(-1*step,-1*step);
+			ctx.moveTo(step,step);
+			
+			ctx.beginPath();
+		 	
+			
+			ctx.fillStyle = `rgba(255, 241, 117,0.8)`;
+			ctx.arc(step,step,step/6,0,Math.PI*2,false);
+			
+			ctx.shadowColor = color;
+			
+			ctx.shadowBlur = 30;
+		 	
+			ctx.fill();
+			ctx.closePath();*/
+
+			ctx.restore();
+
+			
+			ctx.shadowColor = "transparent";
+		setTimeout(flOpen,300/Math.pow(step,2),++step,ctx,color,size);
+	}
+
+	function drawTichinki(ctx,size,color){
+		//тычинки
+		ctx.beginPath();
+					ctx.strokeStyle = "yellow";
+					ctx.lineCap = "round";
+
+					ctx.shadowColor = `rgb(255, 187, 0)`;
+					ctx.shadowBlur = size / 10;
+					ctx.shadowOffsetX = size / 12;
+					ctx.shadowOffsetY = size / 24;
+					ctx.lineWidth = 3;
+					
+					const lX =  Math.random()*size - size/2;
+					const lY =  Math.random()*size - size/2;
+
+					ctx.moveTo(lX,lY);
+					ctx.quadraticCurveTo(lX, lY, lX+ Math.random()*size / 6 - size / 6, lY+ Math.random()*size / 10 - size / 10); 
+
+					ctx.stroke();
+
+		ctx.closePath();
+	}
+
+        
+        const canvas = document.querySelector("canvas");
+        const widthOfScreen = innerWidth-20;
+        const heightOfScreen = 500;
+        canvas.width = widthOfScreen;
+        const field = canvas.getContext("2d");
+        field.fillStyle = "rgb(128, 107, 62)";
+        field.fillRect(0,heightOfScreen-50,widthOfScreen,heightOfScreen);
+
+
+
+
+        const array = (new Array(widthOfScreen)).fill("");
+        
+        array.forEach((elem,i) => array[i] = new Line(widthOfScreen,heightOfScreen,i) );
+
+
+        field.lineJoin = "round";
+        canvas.onclick =  myGrass;
+        canvas.ontouchstart = myGrass;
+        
+        function myGrass(){
+
+            if (array.every((elem)=> elem===0)) {
+                canvas.onclick = (e) =>  openFlower(e.clientX,e.clientY);
+	
+                return;
+            } //выход, когда все выросло.
+            array.forEach((elem) => {
+                if (elem.delay-- > 0) return; //еще не время
+                if (elem !== 0)  elem.graw(field);
+            })    
+            setTimeout(myGrass,25);
+         }
+		
+        function myFlower(e){
+            canvas.onclick =  null; //отключаем, пока цветок не расцветет
+            const flower = new Flower(e);
+            console.log(flower)
+            flower.graw(field,0);
+        }
+
+    </script>
+</body>
+</html>
